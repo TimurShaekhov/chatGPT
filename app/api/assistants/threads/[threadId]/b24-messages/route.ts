@@ -9,6 +9,13 @@ export async function POST(request, { params: { threadId } }) {
   if (!data.content) {
     throw new Error('Content is required. Received data:', data);
   }
+  if(threadId === 'create-new-thread'){
+    // create a new threadID
+    const res = await fetch(`/api/assistants/threads`, {
+      method: "POST",
+    });
+    threadId = await res.json();
+  }
 
   await openai.beta.threads.messages.create(threadId, {
     role: data.role,
