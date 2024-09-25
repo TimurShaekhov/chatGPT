@@ -36,8 +36,13 @@ export async function POST(request, { params: { threadId } }) {
       );
     }
 
-    if (run.status === "incomplete") {
-      console.error('Run is incomplete. Exiting the loop.');
+    if (["requires_action",
+       "cancelling",
+       "cancelled",
+       "failed",
+       "expired",
+       "incomplete"].includes(run.status)) {
+      console.error('Run has problems. Exiting the loop.');
       break;
     }
 
