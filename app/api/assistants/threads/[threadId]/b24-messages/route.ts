@@ -18,12 +18,13 @@ export async function POST(request, { params: { threadId } }) {
     run = await openai.beta.threads.runs.retrieve(threadId, run.id);
     if (run.status === "completed") {
         const messages = await openai.beta.threads.messages.list(threadId);
+        const latestMessage = messages.data[0];
         
         return new Response(
           JSON.stringify({            
               thread_id: threadId,
               run_id: run.id,
-              messages: messages,
+              message: latestMessage,
               data: data,
               status: 'completed',
           }),
