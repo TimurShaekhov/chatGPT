@@ -15,7 +15,7 @@ export async function POST(request, { params: { threadId } }) {
     assistant_id: data.assistantId,
   });
 
-  return new Response(JSON.stringify({ data: data, stream: stream.toReadableStream() }), {
+  return new Response(JSON.stringify({ data: data, stream: stream }), {
     headers: { 'Content-Type': 'application/json' },
   });
 
