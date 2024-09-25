@@ -11,10 +11,8 @@ export async function POST(request, { params: { threadId } }) {
   }
   if(threadId === 'create-new-thread'){
     // create a new threadID
-    const res = await fetch(`/api/assistants/threads`, {
-      method: "POST",
-    });
-    threadId = await res.json();
+    const emptyThread = await openai.beta.threads.create();
+    threadId = emptyThread.id;
   }
 
   await openai.beta.threads.messages.create(threadId, {
