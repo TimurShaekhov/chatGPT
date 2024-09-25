@@ -1,4 +1,3 @@
-import { assistantId } from "@/app/assistant-config";
 import { openai } from "@/app/openai";
 
 export const runtime = "nodejs";
@@ -12,11 +11,11 @@ export async function POST(request, { params: { threadId } }) {
     content: (data.content).toString(),
   });
 
-  const stream = openai.beta.threads.runs.stream(data.threadId, {
+  const stream = openai.beta.threads.runs.stream(threadId, {
     assistant_id: data.assistantId,
   });
 
-  return new Response(JSON.stringify({ data: data, stream: stream }), {
+  return new Response(JSON.stringify({ data: data, stream: stream.toReadableStream() }), {
     headers: { 'Content-Type': 'application/json' },
   });
 
