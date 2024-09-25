@@ -31,6 +31,7 @@ export async function POST(request, { params: { threadId } }) {
           run_id: run.id,
           message: latestMessage,
           data: data,
+          status: 'completed',
         }),
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -41,8 +42,8 @@ export async function POST(request, { params: { threadId } }) {
        "cancelled",
        "failed",
        "expired",
-       "incomplete"].includes(run.status)) {
-      console.error('Run has problems. Exiting the loop.');
+       ].includes(run.status)) {
+      console.log('Run has problems. Exiting the loop.');
       break;
     }
 
@@ -51,7 +52,7 @@ export async function POST(request, { params: { threadId } }) {
   }
 
   return new Response(
-    JSON.stringify({...data, status: 'failed'}),
+    JSON.stringify({data: data, status: 'failed'}),
     { headers: { 'Content-Type': 'application/json' } }
   );
 }
