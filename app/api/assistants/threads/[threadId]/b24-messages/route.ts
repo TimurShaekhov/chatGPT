@@ -45,5 +45,8 @@ export async function POST(request, { params: { threadId } }) {
     attempts++;
   }
 
-  return { thread_id: threadId, run_id: run.id, status: 'failed' };
+  return new Response(
+    JSON.stringify({...data, status: 'failed'}),
+    { headers: { 'Content-Type': 'application/json' } }
+  );
 }
