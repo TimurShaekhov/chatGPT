@@ -11,13 +11,33 @@ export async function POST(request, { params: { threadId } }) {
     content: (data.content).toString(),
   });
 
-  const stream = openai.beta.threads.runs.stream(threadId, {
-    assistant_id: data.assistantId,
-  });
-
-  return new Response(JSON.stringify({ data: data, stream: stream }), {
-    headers: { 'Content-Type': 'application/json' },
-  });
+  let run = await openai.beta.threads.runs.create( threadId, { assistant_id: data.assistant_id } );
+ 
+  let attempts = 0;
+  while (attempts < 10) {
+    run = await openai.beta.threads.runs.retrieve(threadId, run.id);
+    if (run.status === "completed") {
+        const messages = await openai.beta.threads.messages.list(threadId);
+        const latestMessage = messages.data[0];
+        
+        return new Response(
+          JSON.stringify({            
+              thread_id: threadId,
+              run_id: run.id,
+              message_id: latestMessage.id,
+              text: latestMessage.content[0].text.value,
+              messages: messages,
+              data: data,
+              status: 'completed',
+          }),
+          { headers: { 'Content-Type': 'application/json' }, }
+        )
+    }
+    
+    // Если статус не "completed", ждём 3 секунды перед повторной проверкой
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    attempts++;
+  }
 
   //return new Response(stream.toReadableStream());
 }
