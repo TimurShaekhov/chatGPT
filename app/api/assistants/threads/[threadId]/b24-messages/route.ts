@@ -20,7 +20,7 @@ export async function POST(request, { params: { threadId } }) {
   let run = await openai.beta.threads.runs.create( threadId, { assistant_id: data.assistantId } );
  
   let attempts = 0;
-  while (attempts < 10) {
+  while (attempts < 30) {
     run = await openai.beta.threads.runs.retrieve(threadId, run.id);
     if (run.status === "completed") {
         const messages = await openai.beta.threads.messages.list(threadId);
