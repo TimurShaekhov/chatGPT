@@ -5,7 +5,8 @@ export const runtime = "nodejs";
 // Send a new message from other SERVER to a thread
 export async function POST(request, { params: { threadId } }) {
   const data = await request.json();
-
+  console.log ( data );
+  
   if (!data.content) {
     throw new Error('Content is required. Received data:', data);
   }
@@ -36,7 +37,7 @@ export async function POST(request, { params: { threadId } }) {
         )
     }
     
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
     attempts++;
   }
 
