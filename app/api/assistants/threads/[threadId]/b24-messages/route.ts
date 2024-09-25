@@ -1,3 +1,4 @@
+import { assistantId } from "@/app/assistant-config";
 import { openai } from "@/app/openai";
 
 export const runtime = "nodejs";
@@ -6,7 +7,7 @@ export const runtime = "nodejs";
 export async function POST(request, { params: { threadId } }) {
   const data = await request.json();
   console.log ( data );
-  
+
   if (!data.content) {
     throw new Error('Content is required. Received data:', data);
   }
