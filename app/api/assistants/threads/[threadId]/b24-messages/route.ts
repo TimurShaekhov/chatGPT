@@ -24,21 +24,18 @@ export async function POST(request, { params: { threadId } }) {
         const messages = await openai.beta.threads.messages.list(threadId);
         const latestMessage = messages.data[0];
         
-        return new Response(
-          JSON.stringify({            
+        return {
             thread_id: threadId,
             run_id: run.id,
             message: latestMessage,
             data: data,
             status: 'completed',
-          }),
-          { headers: { 'Content-Type': 'application/json' }, }
-        )
+          }
     }
     
     await new Promise(resolve => setTimeout(resolve, 1000));
     attempts++;
   }
 
-  return { thread_id: threadId, run_id: run.id, status: 'failed' };
+  return { data: data, status: 'failed' };
 }
