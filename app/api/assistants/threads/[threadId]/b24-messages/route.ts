@@ -15,11 +15,14 @@ export async function POST(request, { params: { threadId } }) {
     threadId = emptyThread.id; 
   }
 
-  await openai.beta.threads.messages.create(threadId, {
-    role: data.role,
-    content: data.content.toString(),
-  });
-
+  for(let i=0; i < data.content.length; i++){
+    let content = data.content[i];
+    await openai.beta.threads.messages.create(threadId, {
+      role: content.role,
+      content: content.message.toString(),
+    });
+  }
+ 
   let run = await openai.beta.threads.runs.create(threadId, { assistant_id: data.assistantId });
   
   let attempts = 0;
