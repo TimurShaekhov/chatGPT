@@ -22,6 +22,13 @@ export async function POST(request, { params: { threadId } }) {
       content: content.message.toString(),
     });
   }
+
+  if(data.system){
+    await openai.beta.threads.messages.create(threadId, {
+      role: 'system',
+      content: data.system,
+    });
+  }
  
   let run = await openai.beta.threads.runs.create(threadId, { assistant_id: data.assistantId });
   
