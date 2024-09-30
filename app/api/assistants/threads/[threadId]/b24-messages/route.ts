@@ -13,6 +13,13 @@ export async function POST(request, { params: { threadId } }) {
     // create a new threadID
     const emptyThread = await openai.beta.threads.create();
     threadId = emptyThread.id; 
+
+    if(data.instructions){
+      await openai.beta.threads.messages.create(threadId, {
+        role: 'user',
+        content: data.instructions.toString(),
+      });
+    }
   }
 
   for(let i=0; i < data.content.length; i++){
@@ -22,10 +29,10 @@ export async function POST(request, { params: { threadId } }) {
       content: content.message.toString(),
     });
   }
- 
+
   let run = await openai.beta.threads.runs.create(threadId, { 
     assistant_id: data.assistantId,
-    ...(data.instructions && {instructions: data.instructions}),
+    ...(data.additional_instructions && {additional_instructions: data.additional_instructions}),
   });
   
   let attempts = 0;
