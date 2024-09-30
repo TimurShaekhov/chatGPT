@@ -25,7 +25,7 @@ export async function POST(request, { params: { threadId } }) {
  
   let run = await openai.beta.threads.runs.create(threadId, { 
     assistant_id: data.assistantId,
-    ...(data.additional_instructions && {additional_instructions: data.additional_instructions}),
+    ...(data.instructions && {instructions: data.instructions}),
   });
   
   let attempts = 0;
