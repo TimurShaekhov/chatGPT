@@ -14,10 +14,10 @@ export async function POST(request, { params: { threadId } }) {
     const emptyThread = await openai.beta.threads.create();
     threadId = emptyThread.id; 
 
-    if(data.instructions){
+    if(data.ClientJson){
       await openai.beta.threads.messages.create(threadId, {
-        role: 'user',
-        content: data.instructions.toString(),
+        role: 'assistant',
+        content: data.ClientJson,
       });
     }
   }
