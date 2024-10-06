@@ -18,7 +18,7 @@ async function generateImage(prompt) {
 export async function POST(request, { params: { threadId } }) {
   const data = await request.json();
 
-  if (!data.content) {
+  if (!data.messages) {
     throw new Error('Content is required. Received data:', data);
   }
   
@@ -35,10 +35,10 @@ export async function POST(request, { params: { threadId } }) {
     }
   }
 
-  for (let content of data.content) {
+  for (let message of data.messages) {
     await openai.beta.threads.messages.create(threadId, {
-      role: content.role,
-      content: content.message.toString(),
+      role: message.role,
+      content: message.content,
     });
   }
 
