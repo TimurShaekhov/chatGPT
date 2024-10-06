@@ -56,7 +56,7 @@ export async function POST(request, { params: { threadId } }) {
       let latestMessage = messages.data[0];
       
       // Проверяем, нужно ли генерировать изображение
-      if (typeof latestMessage.content[0].text.value === 'string' && latestMessage.content[0].text.value.includes('{"generate":')) {
+      if (latestMessage?.content?.[0]?.text?.value  && latestMessage.content[0].text.value.includes('{"generate":')) {
         const parsedContent = JSON.parse(latestMessage.content[0].text.value);
         if (parsedContent.generate) {
           const imageUrl = await generateImage(parsedContent.generate);
