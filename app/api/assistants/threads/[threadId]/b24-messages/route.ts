@@ -47,7 +47,7 @@ export async function POST(request, { params: { threadId } }) {
     });
 
     // Проверяем, нужно ли генерировать изображение
-    if (content.message.toLowerCase().includes("график")) {
+    if (content.message.toLowerCase().includes("{генерация}")) {
       requiresGraph = true;
       imageUrl = await generateImage(content.message);
       if (imageUrl) {
