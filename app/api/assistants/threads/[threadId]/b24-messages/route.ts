@@ -11,8 +11,7 @@ async function generateImage(prompt) {
     size: '1024x1024',
   });
 
-  const imageUrl = response.data[0].url;
-  return imageUrl; // Возвращаем URL изображения
+  return response.data[0].url; // Возвращаем URL изображения
 }
 
 // Send a new message from other SERVER to a thread
@@ -36,8 +35,7 @@ export async function POST(request, { params: { threadId } }) {
     }
   }
 
-  for (let i = 0; i < data.content.length; i++) {
-    let content = data.content[i];
+  for (let content of data.content) {
     await openai.beta.threads.messages.create(threadId, {
       role: content.role,
       content: content.message.toString(),
@@ -50,25 +48,19 @@ export async function POST(request, { params: { threadId } }) {
   });
   
   let attempts = 0;
-  let latestMessage;
   while (attempts < 90) {
     run = await openai.beta.threads.runs.retrieve(threadId, run.id);
     
     if (run.status === "completed") {
       const messages = await openai.beta.threads.messages.list(threadId);
-      latestMessage = messages.data[0];
+      let latestMessage = messages.data[0];
       
       // Проверяем, нужно ли генерировать изображение
-      if (typeof latestMessage.content === 'string' && latestMessage.content.includes('{"generate":')) {
-        const parsedContent = JSON.parse(latestMessage.content);
+      if (typeof latestMessage.content[0].text.value === 'string' && latestMessage.content[0].text.value.includes('{"generate":')) {
+        const parsedContent = JSON.parse(latestMessage.content[0].text.value);
         if (parsedContent.generate) {
           const imageUrl = await generateImage(parsedContent.generate);
-          if (imageUrl) {
-            await openai.beta.threads.messages.create(threadId, {
-              role: 'assistant',
-              content: `imageUrl: ${imageUrl}, linked to message ID: ${latestMessage.id}`,
-            });
-          }
+          latestMessage.content[0].text.value += `\nimageUrl: ${imageUrl}`;
         }
       }
 
