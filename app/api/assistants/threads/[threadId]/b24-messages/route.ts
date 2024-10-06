@@ -60,7 +60,7 @@ export async function POST(request, { params: { threadId } }) {
         const parsedContent = JSON.parse(textMessage);
         if (parsedContent.generate) {
           const imageUrl = await generateImage(parsedContent.generate);
-          latestMessage.content[0].text.value += `\nimageUrl: ${imageUrl}`;
+          if(latestMessage.content[0].type === 'text') latestMessage.content[0].text.value += `\nimageUrl: ${imageUrl}`;
         }
       }
 
