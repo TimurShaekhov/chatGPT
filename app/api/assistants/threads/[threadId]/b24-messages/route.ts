@@ -48,7 +48,7 @@ export async function POST(request, { params: { threadId } }) {
   });
   
   let attempts = 0;
-  while (attempts < 90) {
+  while (attempts < 90) { 
     run = await openai.beta.threads.runs.retrieve(threadId, run.id);
     
     if (run.status === "completed") {
