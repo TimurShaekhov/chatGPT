@@ -54,9 +54,9 @@ export async function POST(request, { params: { threadId } }) {
     if (run.status === "completed") {
       const messages = await openai.beta.threads.messages.list(threadId);
       let latestMessage = messages.data[0];
-      let textMessage = latestMessage?.content?.[0]?.text?.value;
+      let textMessage = latestMessage.content[0].type === 'text' ? latestMessage.content[0].text.value : '';
       // Проверяем, нужно ли генерировать изображение
-      if (textMessage && textMessage.includes('{"generate":')) {
+      if (textMessage && textMessage.includes('generateImage')) {
         const parsedContent = JSON.parse(textMessage);
         if (parsedContent.generate) {
           const imageUrl = await generateImage(parsedContent.generate);
