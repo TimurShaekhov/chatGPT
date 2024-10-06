@@ -50,15 +50,16 @@ export async function POST(request, { params: { threadId } }) {
   });
   
   let attempts = 0;
+  let latestMessage;
   while (attempts < 90) {
     run = await openai.beta.threads.runs.retrieve(threadId, run.id);
     
     if (run.status === "completed") {
       const messages = await openai.beta.threads.messages.list(threadId);
-      const latestMessage = messages.data[0];
+      latestMessage = messages.data[0];
       
       // Проверяем, нужно ли генерировать изображение
-      if (latestMessage.content.includes('{"generate":')) {
+      if (typeof latestMessage.content === 'string' && latestMessage.content.includes('{"generate":')) {
         const parsedContent = JSON.parse(latestMessage.content);
         if (parsedContent.generate) {
           const imageUrl = await generateImage(parsedContent.generate);
