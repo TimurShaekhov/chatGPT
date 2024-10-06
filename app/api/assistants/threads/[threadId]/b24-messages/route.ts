@@ -4,13 +4,14 @@ export const runtime = "nodejs";
 
 // Функция для генерации изображения с использованием настроенного объекта openai
 async function generateImage(prompt) {
-  const response = await openai.createImage({
+  const response = await openai.images.generate({
+    model: "dall-e-3",
     prompt: prompt,
     n: 1,
     size: '1024x1024',
   });
 
-  const imageUrl = response.data.data[0].url;
+  const imageUrl = response.data[0].url;
   return imageUrl; // Возвращаем URL изображения
 }
 
