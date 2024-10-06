@@ -53,12 +53,13 @@ export async function POST(request, { params: { threadId } }) {
       if (imageUrl) {
         await openai.beta.threads.messages.create(threadId, {
           role: 'assistant',
-          content: `График сгенерирован. Вот ссылка: ${imageUrl}`,
+          content: `imageUrl: ${imageUrl}`,
         });
         return new Response(
           JSON.stringify({
             thread_id: threadId,
-            message: `График сгенерирован. Вот ссылка: ${imageUrl}`,
+            message: imageUrl,
+            data: data,
             status: 'completed',
           }),
           { headers: { 'Content-Type': 'application/json' } }
