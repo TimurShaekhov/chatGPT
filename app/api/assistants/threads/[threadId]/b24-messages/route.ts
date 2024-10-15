@@ -1,4 +1,5 @@
 import { openai } from "@/app/openai";
+import fs from "fs";
 
 export const runtime = "nodejs";
 
@@ -36,11 +37,32 @@ export async function POST(request, { params: { threadId } }) {
   }
 
   for (let message of data.messages) {
+    //Загрузка файлов, запуск функций и т.д.
+    if (typeof message.content === 'object') {
+      for (let elIndex = 0; elIndex < message.content.length; elIndex++) {
+        let el = message.content[elIndex];
+        if (el.type === 'image_url') {
+          const file = await openai.files.create({
+            file: fs.createReadStream(el.image_url.url),
+            purpose: "vision",
+          });
+  
+          message.content[elIndex] = {
+            type: "image_file",
+            image_file: {
+              file_id: file.id,
+            },
+          };
+        }
+      }
+    }
+  
     await openai.beta.threads.messages.create(threadId, {
       role: message.role,
       content: message.content,
     });
   }
+  
 
   let run = await openai.beta.threads.runs.create(threadId, {
     assistant_id: data.assistantId,
