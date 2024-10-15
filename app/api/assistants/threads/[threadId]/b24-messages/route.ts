@@ -44,7 +44,7 @@ export async function POST(request, { params: { threadId } }) {
         if (el.type === 'image_url') {
           const file = await openai.files.create({
             file: fs.createReadStream(el.image_url.url),
-            purpose: "vision",
+            purpose: "assistants",
           });
   
           message.content[elIndex] = {
