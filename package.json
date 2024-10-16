@@ -15,8 +15,7 @@
     "react-dom": "^18",
     "react-markdown": "^9.0.1",
     "axios": "^1.5.0",
-    "uuid": "^9.0.0",
-    "mime-types": "^2.1.35" // Добавлено для работы с расширениями файлов
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/node": "20.12.7",

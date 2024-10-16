@@ -2,7 +2,6 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import mime from 'mime-types';
 import { openai } from '@/app/openai';
 
 export const runtime = "nodejs";
@@ -19,35 +18,17 @@ async function generateImage(prompt) {
   return response.data[0].url; // Возвращаем URL изображения
 }
 
-// Функция для определения расширения файла
-function getFileExtension(url, headers) {
-  let extension = path.extname(url);
-  if (!extension) {
-    const contentType = headers['content-type'];
-    const contentDisposition = headers['content-disposition'];
-    if (contentDisposition) {
-      const match = contentDisposition.match(/filename="(.+?)"/);
-      if (match) {
-        extension = path.extname(match[1]);
-      }
-    }
-    if (!extension && contentType) {
-      extension = '.' + mime.extension(contentType);
-    }
-  }
-  return extension || '.tmp'; // По умолчанию, если не удалось определить
-}
-
 // Функция для обработки изображения по URL
 async function processImageUrl(el, threadId) {
+  const [fileName, downloadUrl] = el.image_url.url; // Получаем имя файла и ссылку для загрузки
+
+  const tempFilePath = path.join(process.cwd(), fileName || `${uuidv4()}.tmp`);
   const response = await axios({
-    url: el.image_url.url,
+    url: downloadUrl,
     method: 'GET',
     responseType: 'stream',
   });
 
-  const extension = getFileExtension(el.image_url.url, response.headers);
-  const tempFilePath = path.join(process.cwd(), `${uuidv4()}${extension}`);
   const writer = fs.createWriteStream(tempFilePath);
   response.data.pipe(writer);
 
@@ -95,7 +76,7 @@ export async function POST(request, { params: { threadId } }) {
     if (typeof message.content === 'object') {
       for (let elIndex = 0; elIndex < message.content.length; elIndex++) {
         let el = message.content[elIndex];
-        if (el.type === 'image_url') {
+        if (el.type === 'image_url' && Array.isArray(el.image_url.url)) {
           message.content[elIndex] = await processImageUrl(el, threadId);
         }
       }
