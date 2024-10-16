@@ -1,5 +1,8 @@
-import { openai } from "@/app/openai";
-import fs from "fs";
+import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import { openai } from '@/app/openai';
 
 export const runtime = "nodejs";
 
@@ -37,13 +40,46 @@ export async function POST(request, { params: { threadId } }) {
   }
 
   for (let message of data.messages) {
-    //Загрузка файлов, запуск функций и т.д.
     if (typeof message.content === 'object') {
       for (let elIndex = 0; elIndex < message.content.length; elIndex++) {
         let el = message.content[elIndex];
         if (el.type === 'image_url') {
+          const response = await axios({
+            url: el.image_url.url,
+            method: 'GET',
+            responseType: 'stream',
+          });
+  
+          // Определение расширения файла
+          let extension = path.extname(el.image_url.url);
+          if (!extension) {
+            const contentType = response.headers['content-type'];
+            const contentDisposition = response.headers['content-disposition'];
+  
+            if (contentDisposition) {
+              const match = contentDisposition.match(/filename="(.+?)"/);
+              if (match) {
+                extension = path.extname(match[1]);
+              }
+            }
+            
+            if (!extension && contentType) {
+              extension = '.' + contentType.split('/')[1];
+            }
+          }
+  
+          // Создание временного файла с правильным расширением
+          const tempFilePath = path.join(process.cwd(), `${uuidv4()}${extension || '.tmp'}`);
+          const writer = fs.createWriteStream(tempFilePath);
+          response.data.pipe(writer);
+  
+          await new Promise((resolve, reject) => {
+            writer.on('finish', resolve);
+            writer.on('error', reject);
+          });
+  
           const file = await openai.files.create({
-            file: fs.createReadStream(el.image_url.url),
+            file: fs.createReadStream(tempFilePath),
             purpose: "assistants",
           });
   
@@ -53,6 +89,8 @@ export async function POST(request, { params: { threadId } }) {
               file_id: file.id,
             },
           };
+  
+          fs.unlinkSync(tempFilePath);
         }
       }
     }
