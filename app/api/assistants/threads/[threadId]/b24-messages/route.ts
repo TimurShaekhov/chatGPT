@@ -19,10 +19,10 @@ async function generateImage(prompt) {
 }
 
 // Функция для обработки изображения по URL
-async function processImageUrl(el, threadId) {
-  const [fileName, downloadUrl] = el.image_url.url; // Получаем имя файла и ссылку для загрузки
+async function processImageFile(el, threadId) {
+  const [fileName, downloadUrl] = el.image_file.file_id; // Получаем имя файла и ссылку для загрузки
 
-  const tempFilePath = path.join(process.cwd(), fileName || `${uuidv4()}.tmp`);
+  const tempFilePath = path.join(process.cwd(), fileName);
   const response = await axios({
     url: downloadUrl,
     method: 'GET',
@@ -43,12 +43,7 @@ async function processImageUrl(el, threadId) {
   });
 
   fs.unlinkSync(tempFilePath);
-  return {
-    type: "image_file",
-    image_file: {
-      file_id: file.id,
-    },
-  };
+  return file.id;
 }
 
 // Send a new message from other SERVER to a thread
@@ -76,8 +71,8 @@ export async function POST(request, { params: { threadId } }) {
     if (typeof message.content === 'object') {
       for (let elIndex = 0; elIndex < message.content.length; elIndex++) {
         let el = message.content[elIndex];
-        if (el.type === 'image_url' && Array.isArray(el.image_url.url)) {
-          message.content[elIndex] = await processImageUrl(el, threadId);
+        if (el.type === 'image_file' && Array.isArray(el.image_file.file_id)) {
+          message.content[elIndex].image_file.file_id = await processImageFile(el, threadId);
         }
       }
     }
